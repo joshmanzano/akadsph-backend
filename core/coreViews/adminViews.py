@@ -225,9 +225,10 @@ class AllAdminDetails(APIView):
         return_info['payments'] = serializer_class.data
 
         # Get All Tutor payouts
-        queryset = TutorPayout.objects.all()
-        serializer_class = TutorPayoutSerializer(queryset, many=True)
-        return_info['payouts'] = serializer_class.data
+        # queryset = TutorPayout.objects.all()
+        # serializer_class = TutorPayoutSerializer(queryset, many=True)
+        # return_info['payouts'] = serializer_class.data
+        return_info['payouts'] = []
 
         # Get GetBusinessStatistics
         business_stats = {}
