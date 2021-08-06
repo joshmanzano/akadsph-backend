@@ -37,7 +37,7 @@ else:
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # DEBUG = env['STAGE'] == 'development'
-DEBUG = stage == 'dev'
+DEBUG = True
 
 # ALLOWED_HOSTS = ['akadsph-backend-dev.ap-southeast-1.elasticbeanstalk.com']
 ALLOWED_HOSTS = ['*']
