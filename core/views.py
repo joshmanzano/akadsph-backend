@@ -1,8 +1,20 @@
 from django.contrib.auth.models import User, Group
-from rest_framework import viewsets
+from rest_framework import viewsets 
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 from rest_framework import permissions
 from core.serializers import UserSerializer, GroupSerializer
+from django.conf import settings
 
+@api_view(['GET'])
+def database_check(request):
+    if request.method == 'GET':
+        engine = settings.DATABASES['default']['ENGINE']
+        host = settings.DATABASES['default']['HOST']
+        return Response({
+            'ENGINE': engine,
+            'HOST': host
+        })
 
 class UserViewSet(viewsets.ModelViewSet):
     """
