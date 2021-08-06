@@ -24,6 +24,20 @@ import string
 from django.conf import settings
 import os
  
+secret_key = os.environ['SECRET_KEY']
+zoom_api_key = os.environ['ZOOM_API']
+zoom_api_secret = os.environ['ZOOM_SECRET']
+zoom_im_token = os.environ['ZOOM_IM']
+
+paymongo_headers = {
+    "Content-Type": "application/json",
+    'Authorization': os.environ['PAYMONGO_KEY']
+}
+
+brankas_url = os.environ['BRANKAS_URL']
+brankas_api = os.environ['BRANKAS_API']
+brankas_dest = os.environ['BRANKAS_DEST']
+
 
 @api_view(['GET'])
 def database_check(request):
