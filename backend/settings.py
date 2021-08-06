@@ -102,15 +102,15 @@ CHANNEL_LAYERS = {
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
-if 'RDS_HOSTNAME' in env:
+if 'DATABASE_HOST' in env:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
-            'NAME': env["RDS_DB_NAME"],
-            'USER': env["RDS_USERNAME"],
-            'PASSWORD': env["RDS_PASSWORD"],
-            'HOST': env["RDS_HOSTNAME"],
-            'PORT': env["RDS_PORT"],
+            'NAME': env["DATABASE_NAME"],
+            'USER': env["DATABASE_USER"],
+            'PASSWORD': env["DATABASE_PASSWORD"],
+            'HOST': env["DATABASE_HOST"],
+            'PORT': env["DATABASE_PORT"],
         }
     }
 else:
