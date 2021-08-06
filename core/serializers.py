@@ -76,7 +76,7 @@ class FeedbackSerializer(serializers.ModelSerializer):
 class SessionSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = Session
-		fields = ['id', 'request', 'tutor_join_link', 'tutee_join_link', 'active', 'start_date_time', 'end_date_time', 'tutor']
+		fields = ['id', 'request', 'active', 'start_date_time', 'end_date_time', 'tutor']
 
 class ConversationSerializer(serializers.ModelSerializer):
 	class Meta:
