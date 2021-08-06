@@ -358,14 +358,17 @@ class AllAdminDetails(APIView):
 
         return_info['requests'] = requests_info
 
+        #TEMP REMOVE
         # Get all session objects
         queryset = Session.objects.filter(active=True).order_by('start_date_time')
         serializer_class = SessionSerializer(queryset, many=True)
-        return_info['active_sessions'] = serializer_class.data
+        # return_info['active_sessions'] = serializer_class.data
+        return_info['active_sessions'] = []
 
         queryset = Session.objects.filter(active=False).order_by('start_date_time')
         serializer_class = SessionSerializer(queryset, many=True)
-        return_info['inactive_sessions'] = serializer_class.data
+        # return_info['inactive_sessions'] = serializer_class.data
+        return_info['inactive_sessions'] = []
 
         queryset = ShopItem.objects.all()
         serializer_class = ShopItemSerializer(queryset, many=True)
