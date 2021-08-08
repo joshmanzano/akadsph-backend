@@ -14,7 +14,8 @@ app = Celery('backend')
 # - namespace='CELERY' means all celery-related configuration keys
 #   should have a `CELERY_` prefix.
 app.config_from_object('django.conf:settings', namespace='CELERY')
-app.conf.broker_url = 'redis://localhost:6379/0'
+app.conf.broker_url = 'redis://akadsredis.gsv5s5.ng.0001.apse1.cache.amazonaws.com:6379/0'
+redbeat_redis_url = app.conf.broker_url
 app.conf.beat_schedule = {
     'check-sessions-and-notify': {
         'task': 'core.tasks.session_notifier',

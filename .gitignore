@@ -2,6 +2,8 @@
 # Created by https://www.toptal.com/developers/gitignore/api/elasticbeanstalk,django,python,visualstudiocode,vim
 # Edit at https://www.toptal.com/developers/gitignore?templates=elasticbeanstalk,django,python,visualstudiocode,vim
 
+celerybeat-schedule
+
 ### Django ###
 *.log
 *.pot
