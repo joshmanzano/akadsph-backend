@@ -55,6 +55,10 @@ INSTALLED_APPS = [
     'corsheaders',
     'core',
     'rest_framework',
+    'health_check',
+    'health_check.db',
+    'health_check.cache',
+    'health_check.storage',
 ]
 
 MIDDLEWARE = [

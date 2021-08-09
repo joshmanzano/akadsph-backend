@@ -185,6 +185,7 @@ urlpatterns = [
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('api-token-auth/', obtain_jwt_token),
     path('api-token-verify/', verify_jwt_token),
-    path('database-check/', views.database_check)
+    path('database-check/', views.database_check),
+    path('health-check/', include('health_check.urls'))
 
 ]
