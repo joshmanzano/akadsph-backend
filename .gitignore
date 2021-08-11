@@ -260,3 +260,5 @@ tags
 .ionide
 
 # End of https://www.toptal.com/developers/gitignore/api/elasticbeanstalk,django,python,visualstudiocode,vim
+
+health_check_storage_test

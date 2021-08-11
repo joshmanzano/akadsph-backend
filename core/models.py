@@ -2,7 +2,8 @@ from django.db import models
 from django.utils import timezone
 import django
 import pytz
-from jsonfield import JSONField
+import uuid
+from django.db.models import JSONField
 
 # Fixing the timezone
 timezone.activate(pytz.timezone("Asia/Manila"))
@@ -21,6 +22,7 @@ class Admin(models.Model):
 
 class Parent(models.Model):
 	username = models.CharField(max_length=100) #take this out change to email
+	id_str = models.UUIDField(default=uuid.uuid4, editable=False)
 	first_name = models.CharField(max_length=80, default = '')
 	last_name = models.CharField(max_length=80, default = '')
 	email = models.CharField(max_length=100, default = '')
@@ -47,6 +49,7 @@ class ParentSetting(models.Model):
 
 class Child(models.Model):
 	parent = models.ForeignKey(Parent, on_delete=models.CASCADE)
+	id_str = models.UUIDField(default=uuid.uuid4, editable=False)
 	email = models.CharField(max_length=80, default = '', blank=True, null=True)
 	first_name = models.CharField(max_length=80)
 	last_name = models.CharField(max_length=80, default = '', blank=True, null=True)
@@ -56,6 +59,7 @@ class Child(models.Model):
 
 class Tutor(models.Model):
 	username = models.CharField(max_length=100, default ='') #take this out change to email
+	id_str = models.UUIDField(default=uuid.uuid4, editable=False)
 	first_name = models.CharField(max_length=80, default = '')
 	last_name = models.CharField(max_length=80, default = '')
 	email = models.CharField(max_length=100, default = '')
