@@ -33,7 +33,7 @@ from multiprocessing import Process
 
 def save_tutor_notification(sender, instance, created, **kwargs):
     if(created):
-        if instance.status is "pending" and instance.is_favourite == False:
+        if instance.status == "pending" and instance.is_favourite == False:
             subject_id = instance.subject.id
             subject_field = instance.subject.subject_field
             tutors = TutorSubject.objects.filter(subject=subject_id)
@@ -63,7 +63,7 @@ def save_tutor_notification(sender, instance, created, **kwargs):
             p = Process(target=SendEmail, args=(subject, message, tutor_emails))
             p.start()
 
-        elif instance.status is "pending" and instance.is_favourite == True and instance.fav_tutor == None:
+        elif instance.status == "pending" and instance.is_favourite == True and instance.fav_tutor == None:
             fav_list = FavouriteTutor.objects.filter(parent=instance.parent.id)
             for fav in fav_list:
                 tutor_ob = fav.tutor
@@ -85,7 +85,7 @@ def save_tutor_notification(sender, instance, created, **kwargs):
                 sendBroadcast(message)
 
 
-        elif instance.status is "pending" and instance.is_favourite == True and instance.fav_tutor != None:
+        elif instance.status == "pending" and instance.is_favourite == True and instance.fav_tutor != None:
             message = instance.parent.first_name + " has requested for your help in " +instance.subject.subject_field + "."
             subject = "Request Notification"
             # Push Notification
@@ -105,7 +105,7 @@ def save_tutor_notification(sender, instance, created, **kwargs):
 
 def save_parent_notification(sender, instance, created, **kwargs):
     if(created):
-        if instance.active is "True":
+        if instance.active == "True":
             tutor_ob = Tutor.objects.get(id=instance.tutor.id)
             message = tutor_ob.first_name + " accepted your request!"
             subject = "Accepted Request Notification"
@@ -124,7 +124,7 @@ def save_parent_notification(sender, instance, created, **kwargs):
 
 def save_tutor_notification_accepted(sender, instance, created, **kwargs):
     if(created):
-        if instance.active is "True" and instance.request.is_favourite == False:
+        if instance.active == "True" and instance.request.is_favourite == False:
             req_ob = Requests.objects.get(id=instance.request.id)
             declined_tutors = req_ob.declined_tutors.all()
             tutors = TutorSubject.objects.filter(subject=instance.request.subject.id)
