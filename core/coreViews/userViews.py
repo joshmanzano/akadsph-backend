@@ -53,7 +53,7 @@ from core.models import (
     Session,
     Conversation,
     Message,
-    Favourite_tutors,
+    FavouriteTutor,
     PayMongoTransaction,
     SourcePayMongoTransaction,
     BrankasTransaction,
@@ -247,7 +247,7 @@ class AllParentDetails(APIView):
             }
             ...
         ],
-        "favourite_tutors": [
+        "FavouriteTutor": [
             {
                 "parent": id of parent,
                 "tutor": id of tutor
@@ -419,7 +419,7 @@ class AllParentDetails(APIView):
         parent_info['finished_requests'] = FinishedRequestsSet
 
         #get favourite tutors
-        queryset = Favourite_tutors.objects.filter(parent=parent_id)
+        queryset = FavouriteTutor.objects.filter(parent=parent_id)
         serializer_class = FavouriteTutorSerializer(queryset, many=True)
 
         fav_tutors = []
@@ -435,7 +435,7 @@ class AllParentDetails(APIView):
 
             fav_tutors.append(preq_info)
 
-        parent_info['favourite_tutors'] = fav_tutors
+        parent_info['FavouriteTutor'] = fav_tutors
 
         #get all transactions
         all_transactions = []
@@ -926,7 +926,7 @@ class AllTutorDetails(APIView):
             preq_info = {}
 
             p_ob = Parent.objects.get(id=r.parent.id)
-            fav_tutor_count = Favourite_tutors.objects.filter(parent=p_ob.id, tutor=tutor.id).count()
+            fav_tutor_count = FavouriteTutor.objects.filter(parent=p_ob.id, tutor=tutor.id).count()
             if fav_tutor_count == 1 and tutor not in r.declined_tutors.all():
                 if r.subject in subject_list:
                     c_ob = Child.objects.get(id=r.child.id)
@@ -1207,7 +1207,7 @@ class AddFavouriteTutor(APIView):
         tutor_id = request.data['tutor_id']
 
         #check if they already favourited the tutor
-        check_match = Favourite_tutors.objects.filter(parent=parent_id).filter(tutor=tutor_id)
+        check_match = FavouriteTutor.objects.filter(parent=parent_id).filter(tutor=tutor_id)
 
         if not check_match:
             data = {
@@ -1310,7 +1310,7 @@ class ParentMakeRequest(APIView):
             #     return Response(return_info)
 
             if fav_tutor != "" and is_favourite == True:
-                fav_count = Favourite_tutors.objects.filter(parent=parent_id, tutor=fav_tutor).count()
+                fav_count = FavouriteTutor.objects.filter(parent=parent_id, tutor=fav_tutor).count()
                 if fav_count == 0:
                     return_info['return_status'] = "error"
                     return_info['return_message'] = "Error: Favourite tutor id sent is not in list of favourite tutors of parent"

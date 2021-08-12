@@ -9,7 +9,7 @@ from core.models import (
     Session,
     Conversation,
     Message,
-    Favourite_tutors,
+    FavouriteTutor,
     PayMongoTransaction,
     SourcePayMongoTransaction,
     BrankasTransaction,
@@ -56,7 +56,7 @@ class ParentSerializer(serializers.ModelSerializer):
 class TutorSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = Tutor
-		fields = ['id', 'username','first_name', 'last_name', 'email', 'school', 'course', 'achievements', 'rating', 'zoominfo', 'status', 'phone', 'picture', 'files', 'bank_name', 'bank_account_name', 'bank_account_type', 'bank_account_number', 'first_time_user', 'birthday', 'fake_user']
+		fields = ['id', 'username','first_name', 'last_name', 'email', 'school', 'course', 'achievements', 'rating', 'status', 'phone', 'picture', 'files', 'bank_name', 'bank_account_name', 'bank_account_type', 'bank_account_number', 'first_time_user', 'birthday', 'fake_user']
 
 class ChildSerializer(serializers.ModelSerializer):
 	class Meta:
@@ -110,7 +110,7 @@ class AdminTutorMessageSerializer(serializers.ModelSerializer):
 
 class FavouriteTutorSerializer(serializers.ModelSerializer):
 	class Meta:
-		model = Favourite_tutors
+		model = FavouriteTutor
 		fields = ['id', 'parent', 'tutor']
 
 class AvailableDaysSerializer(serializers.ModelSerializer):

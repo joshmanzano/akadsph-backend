@@ -1,199 +1,405 @@
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User
-from core.models import Parent, Child, Tutor, TutorSubject, Subject, \
-    AdminParentConversation, AdminParentMessage, AdminTutorConversation, AdminTutorMessage
+from core.models import GeneralPromo, UniquePromo, BrankasTransaction, SourcePayMongoTransaction, AdminTutorMessage, AdminTutorConversation, AdminParentMessage, AdminParentConversation, AccountLogger, Admin, ShopItem, TutorSubject, Parent, Tutor, Child, Requests, Feedback, Session, Conversation, Message, FavouriteTutor, PayMongoTransaction, AvailableDays, Subject, AdminSetting, ParentSetting, TutorSetting
 from core.serializers import SubjectSerializer
 import os
 import requests
 import jwt
 import json
 import re
+import pandas as pd
+from datetime import datetime
+from tqdm import tqdm
 
-blacklistEmail = []
+def cleanData(data):
+    for d in data:
+        if(type(data[d]) == str):
+            data[d] = data[d].strip()
+        if d == 'email':
+            data[d] = data[d].lower()
+        if d == 'first_name' or d == 'last_name':
+            data[d] = data[d].title()
+        if d == 'phone':
+            def checkPhone(phonenum):
+                try:
+                    if('.' in phonenum):
+                        return ''
+                    elif(phonenum.startswith('+63')):
+                        if(phonenum == '+63'):
+                            return ''
+                        elif(phonenum[3] == '0'):
+                            return '+63' + phonenum[4:]
+                        elif(phonenum[3] == '+'):
+                            if(phonenum[6:] == ''):
+                                return ''
+                            else:
+                                return '+63' + phonenum[6:]
+                        else:
+                            return phonenum
+                    else:
+                        if(phonenum[0] == '0'):
+                            return '+63' + phonenum[1:]
+                        else:
+                            return '+63' + phonenum
+                except:
+                    return ''
+            data[d] = checkPhone(data[d].strip().replace(' ', ''))
+            if(len(data[d]) != 13 and len(data[d]) != 11):
+                data[d] = ''
+    return data
 
-with open('blacklist.json', 'r') as f:
-    data = json.load(f)
-    blacklistEmail = data['emails']
+def checkEmail(email, blacklistEmail):
+    email = email.lower()
+    if(email in blacklistEmail):
+        return False
+    if(not re.match(r"[^@]+@[^@]+\.[^@]+",email)):
+        return False
+    return True
+    
+def readParents(df, blacklistEmail):
+    parent_rows = df[df['model'] == 'core.parent']
+    parents = []
+    parentID = []
+    for index, row in parent_rows.iterrows():
+        if(checkEmail(row['fields']['email'], blacklistEmail)):
+            parent = cleanData(row['fields']) 
+            parent['id'] = row['pk']
+            parents.append(parent)
+            parentID.append(parent['id'])
+    return parents, parentID
 
-def cleanPhone(phonenum):
-    try:
-        if(phonenum.startswith('+63')):
-            if(phonenum[3] == '0'):
-                return '+63' + phonenum[4:]
-            elif(phonenum[3] == '+'):
-                return '+63' + phonenum[6:]
-            else:
-                return phonenum
-        else:
-            if(phonenum[0] == '0'):
-                return '+63' + phonenum[1:]
-            else:
-                return '+63' + phonenum
-    except:
-        return ''
+def readChildren(df, parentID):
+    child_rows = df[df['model'] == 'core.child']
+    children = []
+    for index, row in child_rows.iterrows():
+        if(row['fields']['parent'] in parentID):
+            child = cleanData(row['fields']) 
+            child['id'] = row['pk']
+            children.append(child)
+    return children
 
+def readTutors(df, blacklistEmail):
+    tutor_rows = df[df['model'] == 'core.tutor']
+    tutors = []
+    for index, row in tutor_rows.iterrows():
+        if(checkEmail(row['fields']['email'], blacklistEmail)):
+            tutor = cleanData(row['fields']) 
+            tutor['id'] = row['pk']
+            tutors.append(tutor)
+    return tutors
 
+def RegisterTutor(data):
+    tutor = Tutor(id=data['id'],
+    username=data['username'],
+    first_name=data['first_name'],
+    last_name=data['last_name'],
+    email=data['email'],
+    school=data['school'],
+    course=data['course'],
+    achievements=data['achievements'],
+    phone=data['phone'],
+    picture=data['picture'],
+    bank_name=data['bank_name'],
+    bank_account_number=data['bank_account_number'],
+    bank_account_name=data['bank_account_name'],
+    bank_account_type=data['bank_account_type'],
+    )
+    tutor.save()
 
-def createFolders(parent_fname, parent_lname, parent_id, subjects):
+    return True
 
-    ## Functions
+def RegisterParent(data):
+    parent = Parent(id=data['id'],
+    username=data['username'],
+    first_name=data['first_name'],
+    last_name=data['last_name'],
+    email=data['email'],
+    credits=data['credits'],
+    status=data['status'],
+    phone=data['phone'],
+    picture=data['picture'],
+    files=data['files'],
+    referrer_code=data['referrer_code'],
+    referrer_method=data['referrer_method'],
+    survey=data['survey'],
+    other_referrer=data['other_referrer'],
+    fake_user=data['fake_user'],
+    )
+    parent.save()
 
-    def createFolder(folder_name):
-        url = os.environ['NEXTCLOUD_PARENTS']+folder_name
+    return True
 
-        payload={}
-        headers = {
-        'Authorization': os.environ['NEXTCLOUD_KEY'],
-        'Cookie': 'cookie_test=test; __Host-nc_sameSiteCookielax=true; __Host-nc_sameSiteCookiestrict=true; oc_sessionPassphrase=%2Bcn4AjaZOjVC26NyMJM1pEXJBR07ZoXU2ReGBO3xdnosJ3fqdCNjwYKe6WRxSa3%2BsUwbnIpsZIJi7A0sk%2Bh8wykhq3EKIrh%2Be3lwUliRDMlJRruWz%2BMDI%2BO3lBrcIofm; ocvxou9w2hgj=512012323fe963d4c2546c226b27b4db'
-        }
+def AddChild(data):
+    child = Child(id=data['id'],
+    parent=Parent.objects.get(id=data['parent']),
+    email=data['email'],
+    first_name=data['first_name'],
+    last_name=data['last_name'],
+    age=data['age'],
+    year_level=data['year_level'],
+    school=data['school'])
+    child.save()
 
-        requests.request("MKCOL", url, headers=headers, data=payload)
-
-    folder_name = parent_fname+'-'+parent_lname+'-'+str(parent_id)
-
-    ## Create Folders
-
-    createFolder(folder_name)
-
-    for s in subjects:
-        createFolder(folder_name+'/'+s)
-
-    ## Share Folder
-
-    url = os.environ['NEXTCLOUD_SHARES']
-
-    payload="{\n\"path\": \"/Parents/"+folder_name+"\",\n\"shareType\": 3,\n\"publicUpload\": \"true\"\n}"
-    headers = {
-    'OCS-APIRequest': 'true',
-    'Authorization': os.environ['NEXTCLOUD_KEY'],
-    'Content-Type': 'application/json',
-    'Cookie': '__Host-nc_sameSiteCookielax=true; __Host-nc_sameSiteCookiestrict=true; oc_sessionPassphrase=%2Bcn4AjaZOjVC26NyMJM1pEXJBR07ZoXU2ReGBO3xdnosJ3fqdCNjwYKe6WRxSa3%2BsUwbnIpsZIJi7A0sk%2Bh8wykhq3EKIrh%2Be3lwUliRDMlJRruWz%2BMDI%2BO3lBrcIofm; ocvxou9w2hgj=512012323fe963d4c2546c226b27b4db'
-    }
-
-    response = requests.request("POST", url, headers=headers, data=payload)
-
-    data_dict = xmltodict.parse(response.text)
-
-    return data_dict['ocs']['data']['url']
+    return True
 
 class Command(BaseCommand):
+    help = 'Load data from json file to database.'
 
-    def RegisterTutor(self, data):
-            tutor = Tutor(username=data['username'].strip(),
-            first_name=data['first_name'].strip(),
-            last_name=data['last_name'].strip(),
-            email=data['email'].strip().lower(),
-            school=data['school'].strip(),
-            course=data['course'].strip(),
-            achievements=data['achievements'].strip(),
-            phone=cleanPhone(data['phone']),
-            picture=data['picture'],
-            bank_name=data['bank_name'].strip(),
-            bank_account_number=data['bank_account_number'],
-            bank_account_name=data['bank_account_name'].strip(),
-            bank_account_type=data['bank_account_type'].strip(),
-            )
-            tutor.save()
-            return True
-
-    def RegisterParent(self, data):
-        parent = Parent(id=data['id'],
-        username=data['username'].strip(),
-        first_name=data['first_name'].strip(),
-        last_name=data['last_name'].strip(),
-        email=data['email'].strip().lower(),
-        credits=data['credits'],
-        status=data['status'],
-        phone=data['phone'],
-        picture=data['picture'],
-        files=data['files'],
-        referrer_code=data['referrer_code'],
-        referrer_method=data['referrer_method'],
-        survey=data['survey'],
-        other_referrer=data['other_referrer'],
-        fake_user=data['fake_user'],
-        )
-        parent.save()
-
-        if('child' in data):
-            if(data['child']['age'] == ''):
-                data['child']['age'] = None
-            childData = data['child']
-            child = Child(parent=parent,email=childData['email'].strip(),first_name=childData['first_name'].strip(),last_name=childData['last_name'].strip(),age=childData['age'],year_level=childData['year_level'].strip(),school=childData['school'].strip())
-            child.save()
-
-        return True
-    
-    def parentCheck(self, parent):
-        email = parent['email']
-        if(email in blacklistEmail):
-            return False
-        if(not re.match(r"[^@]+@[^@]+\.[^@]+",email)):
-            return False
-        return True
+    def add_arguments(self, parser):
+        parser.add_argument('dataPath', help='File path of json file to load')
+        parser.add_argument('--blacklistPath', help='File path of email blacklist json file')
 
     def handle(self, *args, **options):
-        with open('aug06.json') as f:
+        blacklistEmail = []
+
+        with open(options['blacklistPath'], 'r') as f:
+            data = json.load(f)
+            blacklistEmail = data['emails']
+
+        with open(options['dataPath']) as f:
             data = json.loads(f.readline())
 
-        parents = data['parents']
-        children = {}
-        errors = []
+        df = pd.DataFrame(data)
+        removeModel = ['auth.permission', 'auth.user', 'contenttypes.contenttype', 'sessions.session', \
+            'core.paymongotransaction', 'core.sourcepaymongotransaction', 'core.brankastransaction', \
+            'core.parentnotification', 'core.tutornotification', 'core.tutorpayout', 'core.shopitem', \
+            'core.accountlogger', 'core.credittracker', 'core.admin']
+        for model in removeModel:
+            df = df.drop(df[df['model'] == model].index)
 
-        for child in data['children']:
-            children[child['parent']] = child
+        print('Loading...')
 
+        parents, parentID = readParents(df, blacklistEmail)
+        df = df.drop(df[df['model'] == 'core.parent'].index)
+        for parent in tqdm(parents):
+            RegisterParent(parent)
 
-        for parent in parents:
-            parent['last_name'] = parent['last_name'].capitalize()
-            parent['first_name'] = parent['first_name'].strip()
-            parent['email'] = parent['email'].strip().lower()
-            parent['username'] = parent['email']
-            parent['phone'] = cleanPhone(parent['phone'].strip())
-            parent['first_time_user'] = True
+        children = readChildren(df, parentID)
+        df = df.drop(df[df['model'] == 'core.child'].index)
+        for child in tqdm(children):
+            AddChild(child)
+
+        tutors = readTutors(df, blacklistEmail)
+        df = df.drop(df[df['model'] == 'core.tutor'].index)
+        for tutor in tqdm(tutors):
+            RegisterTutor(tutor)
+
+        rows = df[df['model'] == 'core.subject']
+        for index, row in tqdm(rows.iterrows()):
+            data = cleanData(row['fields']) 
+            data['id'] = row['pk']
+            obj = Subject(**data)
+            obj.save()
+        df = df.drop(rows.index)
+
+        rows = df[df['model'] == 'core.requests']
+        for index, row in tqdm(rows.iterrows()):
+            data = cleanData(row['fields']) 
+            data['id'] = row['pk']
             try:
-                pass
-                parent['child'] = children[parent['id']]
-                # payload = json.dumps(parent)
-                # r = s.post('%sregister-parent/' % api_url,headers=headers, data=payload)
-                # print(r.status_code)
-                # if(r.status_code != 200):
-                #     with open('error.html', 'w') as errorfile:
-                #         errorfile.write(r.text)
-                #     print(r.status_code)
-                #     errors.append(parent['email'])
+                data['parent'] = Parent.objects.get(id=data['parent'])
+                if(data['fav_tutor'] != None):
+                    data['fav_tutor'] = Tutor.objects.get(id=data['fav_tutor'])
             except:
-                pass
-                # print('No child',parent['first_name'],parent['last_name'])
-            if(self.parentCheck(parent)):
-                result = self.RegisterParent(parent)
+                continue
+            data['child'] = Child.objects.get(id=data['child'])
+            data['subject'] = Subject.objects.get(id=data['subject'])
+            del data['declined_tutors']
+            obj = Requests(**data)
+            obj.save()
+        df = df.drop(rows.index)
+        
 
-        tutors = data['tutors']
-        errors = []
-
-        for tutor in tutors:
-            tutor['last_name'] = tutor['last_name'].capitalize()
-            tutor['first_name'] = tutor['first_name'].strip()
-            tutor['email'] = tutor['email'].strip().lower()
-            tutor['username'] = tutor['email']
-            tutor['phone'] = '+63' + tutor['phone'].strip()
-            tutor['first_time_user'] = True
-            print(tutor['email'], tutor['first_name'])
-            tutor['subjects'] = [] 
+        rows = df[df['model'] == 'core.availabledays']
+        for index, row in tqdm(rows.iterrows()):
+            data = cleanData(row['fields']) 
+            data['id'] = row['pk']
             try:
-                for subject in tutor_subjects[tutor['email']]:
-                    if (subject.strip() != '' and subject.strip() != 'Chinese'):
-                        tutor['subjects'].append(subject)
+                data['request'] = Requests.objects.get(id=data['request'])
             except:
-                print(tutor['subjects'])
-            tutor_id = tutor['id']
-            payload = json.dumps(tutor)
-            r = s.post('%sregister-tutor/' % api_url,headers=headers, data=payload)
-            print(r.status_code)
-            if(r.status_code != 200):
-                with open('error.html', 'w') as errorfile:
-                    errorfile.write(r.text)
-                print(r.status_code)
-                errors.append(tutor['email'])
+                continue
+            obj = AvailableDays(**data)
+            obj.save()
+        df = df.drop(rows.index)
+        
 
-        print(errors)
+        rows = df[df['model'] == 'core.session']
+        for index, row in tqdm(rows.iterrows()):
+            data = cleanData(row['fields']) 
+            data['id'] = row['pk']
+            del data['start_zoom_link']
+            del data['join_zoom_link']
+            del data['zoom_id']
+            del data['meet_link']
+            try:
+                data['request'] = Requests.objects.get(id=data['request'])
+                data['tutor'] = Tutor.objects.get(id=data['tutor'])
+            except:
+                continue
+            obj = Session(**data)
+            obj.save()
+        df = df.drop(rows.index)
+        
+
+        rows = df[df['model'] == 'core.tutorsubject']
+        for index, row in tqdm(rows.iterrows()):
+            data = cleanData(row['fields']) 
+            data['id'] = row['pk']
+            data['subject'] = Subject.objects.get(id=data['subject'])
+            try:
+                data['tutor'] = Tutor.objects.get(id=data['tutor'])
+            except:
+                continue
+            obj = TutorSubject(**data)
+            obj.save()
+        df = df.drop(rows.index)
+        
+
+        rows = df[df['model'] == 'core.favourite_tutors']
+        for index, row in tqdm(rows.iterrows()):
+            data = cleanData(row['fields']) 
+            data['id'] = row['pk']
+            try:
+                data['parent'] = Parent.objects.get(id=data['parent'])
+                data['tutor'] = Tutor.objects.get(id=data['tutor'])
+            except:
+                continue
+            obj = FavouriteTutor(**data)
+            obj.save()
+        df = df.drop(rows.index)
+        
+
+        rows = df[df['model'] == 'core.adminparentconversation']
+        for index, row in tqdm(rows.iterrows()):
+            data = cleanData(row['fields']) 
+            data['id'] = row['pk']
+            try:
+                data['parent'] = Parent.objects.get(id=data['parent'])
+            except:
+                continue
+            obj = AdminParentConversation(**data)
+            obj.save()
+        df = df.drop(rows.index)
+        
+
+        rows = df[df['model'] == 'core.admintutorconversation']
+        for index, row in tqdm(rows.iterrows()):
+            data = cleanData(row['fields']) 
+            data['id'] = row['pk']
+            try:
+                data['tutor'] = Tutor.objects.get(id=data['tutor'])
+            except:
+                continue
+            obj = AdminTutorConversation(**data)
+            obj.save()
+        df = df.drop(rows.index)
+        
+
+        rows = df[df['model'] == 'core.conversation']
+        for index, row in tqdm(rows.iterrows()):
+            data = cleanData(row['fields']) 
+            data['id'] = row['pk']
+            try:
+                data['parent'] = Parent.objects.get(id=data['parent'])
+                data['tutor'] = Tutor.objects.get(id=data['tutor'])
+                data['session'] = Session.objects.get(id=data['session'])
+            except:
+                continue
+            obj = Conversation(**data)
+            obj.save()
+        df = df.drop(rows.index)
+        
+
+        rows = df[df['model'] == 'core.adminparentmessage']
+        for index, row in tqdm(rows.iterrows()):
+            data = cleanData(row['fields']) 
+            data['id'] = row['pk']
+            try:
+                data['ap_conversation'] = AdminParentConversation.objects.get(id=data['ap_conversation'])
+            except:
+                continue
+            obj = AdminParentMessage(**data)
+            obj.save()
+        df = df.drop(rows.index)
+        
+
+        rows = df[df['model'] == 'core.admintutormessage']
+        for index, row in tqdm(rows.iterrows()):
+            data = cleanData(row['fields']) 
+            data['id'] = row['pk']
+            try:
+                data['at_conversation'] = AdminTutorConversation.objects.get(id=data['at_conversation'])
+            except:
+                continue
+            obj = AdminTutorMessage(**data)
+            obj.save()
+        df = df.drop(rows.index)
+        
+
+        rows = df[df['model'] == 'core.message']
+        for index, row in tqdm(rows.iterrows()):
+            data = cleanData(row['fields']) 
+            data['id'] = row['pk']
+            try:
+                data['conversation'] = Conversation.objects.get(id=data['conversation'])
+            except:
+                continue
+
+                    
+            obj = Message(**data)
+            obj.save()
+        df = df.drop(rows.index)
+        
+
+        Admin(
+            username='akads.ph@gmail.com',
+            email='akads.ph@gmail.com',
+        ).save()
+
+        shopItems = [
+            {
+            "amount": 4000.00,
+            "name": "8 Hours",
+            "credits": 8,
+            "description": "8 Hour Bundle for 4000 PHP",
+            "commission": 2400.00
+            },
+            {
+            "amount": 5200.00,
+            "name": "12 Hours",
+            "credits": 12,
+            "description": "12 Hour Bundle for 5200 PHP",
+            "commission": 3600.00
+            }
+        ]
+        
+
+        for shopItem in shopItems:
+            ShopItem(**shopItem).save()
+
+        print('Successfully loaded!')
+
+        # conversations = Conversation.objects.all()
+        # with open('aug11chatlogs.txt','w') as f:
+        #     for c in conversations:
+        #         messages = Message.objects.filter(conversation=c)
+        #         parent = c.parent
+        #         tutor = c.tutor
+        #         f.write(f'### {parent.first_name} - {tutor.first_name} ###\n')
+        #         f.write('\n')
+        #         for message in messages:
+        #             if('Hello! My name is' not in message.text):
+        #                 date = message.time_sent
+        #                 if(data['sender'] == 'parent'):
+        #                     line = f"{parent.first_name}: {message.text}"
+        #                     f.write(date.strftime('%c')+'\n')
+        #                     f.write(line+'\n')
+        #                     f.write('\n')
+        #                 elif(data['sender'] == 'tutor'):
+        #                     line = f"{tutor.first_name}: {message.text}"
+        #                     f.write(date.strftime('%c')+'\n')
+        #                     f.write(line+'\n')
+        #                     f.write('\n')
+        #         f.write('#######\n')
+        #         f.write('\n')
+

@@ -47,7 +47,7 @@ from core.models import (
     Session,
     Conversation,
     Message,
-    Favourite_tutors,
+    FavouriteTutor,
     PayMongoTransaction,
     AvailableDays,
     Subject,

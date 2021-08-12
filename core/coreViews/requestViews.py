@@ -46,7 +46,7 @@ from core.models import (
     Session,
     Conversation,
     Message,
-    Favourite_tutors,
+    FavouriteTutor,
     PayMongoTransaction,
     AvailableDays,
     Subject,
@@ -586,7 +586,7 @@ class TutorDeclineRequest(APIView):
             # CASE 2: The set of Favourite tutors of a certain parent are declining the request
             elif queryset.is_favourite == True and queryset.fav_tutor == None:
                 tutor_ob = Tutor.objects.get(id=tutor_id)
-                fav_list = Favourite_tutors.objects.filter(parent=queryset.parent.id, tutor=tutor_id)
+                fav_list = FavouriteTutor.objects.filter(parent=queryset.parent.id, tutor=tutor_id)
                 for fav in fav_list:
                     if tutor_id == fav.tutor.id:
                         queryset.declined_tutors.add(Tutor.objects.get(id=tutor_id))

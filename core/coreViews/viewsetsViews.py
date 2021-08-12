@@ -51,7 +51,7 @@ from core.models import (
     Session,
     Conversation,
     Message,
-    Favourite_tutors,
+    FavouriteTutor,
     PayMongoTransaction,
     AvailableDays,
     Subject,
@@ -456,7 +456,7 @@ class FavouriteTutorViewSet(viewsets.ModelViewSet):
         "tutor": id of tutor
     }
     """
-    queryset = Favourite_tutors.objects.all()
+    queryset = FavouriteTutor.objects.all()
     serializer_class = FavouriteTutorSerializer
     permission_classes = [permissions.IsAuthenticated]
     http_method_names = ['get', 'put', 'patch', 'post', 'head']

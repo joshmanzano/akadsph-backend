@@ -10,6 +10,7 @@ timezone.activate(pytz.timezone("Asia/Manila"))
 # Create your models here.
 class Subject(models.Model):
 	subject_field = models.CharField(max_length=80)
+	available = models.BooleanField(default=True)
 
 class AdminSetting(models.Model):
 	field_name = models.CharField(max_length=80)
@@ -67,7 +68,6 @@ class Tutor(models.Model):
 	course = models.CharField(max_length=100, default ='', blank=True, null=True)
 	achievements = models.TextField(default ='', blank=True, null=True)
 	rating = models.FloatField(default = 0)
-	zoominfo = models.CharField(max_length=500, default='', blank=True, null=True)
 	status = models.BooleanField(default = True)
 	phone = models.CharField(max_length=80, default = '', blank=True, null=True)
 	picture = models.TextField(default='', blank=True, null=True)
@@ -85,7 +85,7 @@ class TutorSetting(models.Model):
 	field_name = models.CharField(max_length=80)
 	value = models.CharField(max_length=100)
 
-class Favourite_tutors(models.Model):
+class FavouriteTutor(models.Model):
 	parent = models.ForeignKey(Parent, on_delete=models.CASCADE)
 	tutor = models.ForeignKey(Tutor, on_delete=models.CASCADE)
 
@@ -237,6 +237,7 @@ class TutorPayout(models.Model):
 	isPaid = models.BooleanField(default = False)
 
 class ShopItem(models.Model):
+	id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 	amount = models.IntegerField()
 	name = models.CharField(max_length=1000)
 	credits = models.IntegerField()

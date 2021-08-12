@@ -55,7 +55,7 @@ from core.models import (
     Session,
     Conversation,
     Message,
-    Favourite_tutors,
+    FavouriteTutor,
     PayMongoTransaction,
     AvailableDays,
     Subject,
@@ -389,7 +389,7 @@ class AllAdminDetails(APIView):
         serializer_class = SubjectSerializer(queryset, many=True)
         return_info['subjects'] = serializer_class.data
 
-        queryset = Favourite_tutors.objects.all()
+        queryset = FavouriteTutor.objects.all()
         serializer_class = FavouriteTutorSerializer(queryset, many=True)
         return_info['fav_tutors'] = serializer_class.data
 

@@ -7,7 +7,7 @@ from core.models import (
         Session,
         Conversation,
         Message,
-        Favourite_tutors,
+        FavouriteTutor,
         PayMongoTransaction,
         AvailableDays,
         Subject,
@@ -64,7 +64,7 @@ def save_tutor_notification(sender, instance, created, **kwargs):
             p.start()
 
         elif instance.status is "pending" and instance.is_favourite == True and instance.fav_tutor == None:
-            fav_list = Favourite_tutors.objects.filter(parent=instance.parent.id)
+            fav_list = FavouriteTutor.objects.filter(parent=instance.parent.id)
             for fav in fav_list:
                 tutor_ob = fav.tutor
                 message = instance.parent.first_name + " has requested for your help in " +instance.subject.subject_field + "."

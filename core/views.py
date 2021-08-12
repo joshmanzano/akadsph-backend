@@ -10,7 +10,7 @@ import jwt
 from rest_framework.response import Response
 import smtplib
 from rest_framework.generics import ListAPIView, ListCreateAPIView, DestroyAPIView, UpdateAPIView
-from core.models import GeneralPromo, UniquePromo, BrankasTransaction, SourcePayMongoTransaction, AdminTutorMessage, AdminTutorConversation, AdminParentMessage, AdminParentConversation, AccountLogger, Admin, ShopItem, TutorSubject, Parent, Tutor, Child, Requests, Feedback, Session, Conversation, Message, Favourite_tutors, PayMongoTransaction, AvailableDays, Subject, AdminSetting, ParentSetting, TutorSetting
+from core.models import GeneralPromo, UniquePromo, BrankasTransaction, SourcePayMongoTransaction, AdminTutorMessage, AdminTutorConversation, AdminParentMessage, AdminParentConversation, AccountLogger, Admin, ShopItem, TutorSubject, Parent, Tutor, Child, Requests, Feedback, Session, Conversation, Message, FavouriteTutor, PayMongoTransaction, AvailableDays, Subject, AdminSetting, ParentSetting, TutorSetting
 from django.utils import timezone
 from django.core.exceptions import ObjectDoesNotExist
 import datetime
@@ -181,7 +181,7 @@ def createTutorFolders(tutor_fname, tutor_lname, tutor_id):
 
 
 def decodeToken(token):
-    data = jwt.decode(token, secret_key, algorithm='HS256')
+    data = jwt.decode(token, os.environ['SECRET_KEY'], algorithm='HS256')
     return data
 
 # To get ID (primary key):
@@ -730,7 +730,7 @@ class LoginParent(APIView):
                     'sub':admin.username,
                     'type':'admin'
                 }
-                encoded_jwt = jwt.encode(payload, secret_key, algorithm='HS256')
+                encoded_jwt = jwt.encode(payload, os.environ['SECRET_KEY'], algorithm='HS256')
                 data['exists'] = True
                 data['session_token'] = encoded_jwt
                 return Response(data)
@@ -743,7 +743,7 @@ class LoginParent(APIView):
                     'sub':parent.username,
                     'type':'parent'
                 }
-                encoded_jwt = jwt.encode(payload, secret_key, algorithm='HS256')
+                encoded_jwt = jwt.encode(payload, os.environ['SECRET_KEY'], algorithm='HS256')
                 data['exists'] = True
                 data['session_token'] = encoded_jwt
                 try:
@@ -778,7 +778,7 @@ class LoginTutor(APIView):
                     'sub':admin.username,
                     'type':'admin'
                 }
-                encoded_jwt = jwt.encode(payload, secret_key, algorithm='HS256')
+                encoded_jwt = jwt.encode(payload, os.environ['SECRET_KEY'], algorithm='HS256')
                 data['exists'] = True
                 data['session_token'] = encoded_jwt
                 return Response(data)
@@ -791,7 +791,7 @@ class LoginTutor(APIView):
                     'sub':tutor.username,
                     'type':'tutor'
                 }
-                encoded_jwt = jwt.encode(payload, secret_key, algorithm='HS256')
+                encoded_jwt = jwt.encode(payload, os.environ['SECRET_KEY'], algorithm='HS256')
                 data['exists'] = True
                 data['session_token'] = encoded_jwt
                 tutor.picture = data['picture']
@@ -818,7 +818,7 @@ class LoginTutor(APIView):
             'sub':tutor.username,
             'type':'tutor'
         }
-        encoded_jwt = jwt.encode(payload, secret_key, algorithm='HS256')
+        encoded_jwt = jwt.encode(payload, os.environ['SECRET_KEY'], algorithm='HS256')
         data['exists'] = True
         data['session_token'] = encoded_jwt
         return Response(data)
@@ -842,7 +842,7 @@ class RegisterAdmin(APIView):
             'type':'admin'
         }
 
-        encoded_jwt = jwt.encode(payload, secret_key, algorithm='HS256')
+        encoded_jwt = jwt.encode(payload, os.environ['SECRET_KEY'], algorithm='HS256')
         return Response(encoded_jwt)
 
 class RegisterParent(APIView):
@@ -900,7 +900,7 @@ class RegisterParent(APIView):
             text='Hello, ' + parent.first_name + '! If you have any inquiries or concerns, please feel free to message me!')
         message.save()
 
-        encoded_jwt = jwt.encode(payload, secret_key, algorithm='HS256')
+        encoded_jwt = jwt.encode(payload, os.environ['SECRET_KEY'], algorithm='HS256')
         return Response(encoded_jwt)
 
 class RegisterTutor(APIView):
@@ -947,13 +947,13 @@ class RegisterTutor(APIView):
             text='Hello, ' + tutor.first_name + '! If you have any inquiries or concerns, please feel free to message me!')
         message.save()
 
-        encoded_jwt = jwt.encode(payload, secret_key, algorithm='HS256')
+        encoded_jwt = jwt.encode(payload, os.environ['SECRET_KEY'], algorithm='HS256')
         return Response(encoded_jwt)
 
 class TokenInfo(APIView):
     def post(self, request, format=None):
         try:
-            data = jwt.decode(request.data['session_token'], secret_key, algorithm='HS256')
+            data = jwt.decode(request.data['session_token'], os.environ['SECRET_KEY'], algorithm='HS256')
             if(data['type'] == 'parent'):
                 parent = Parent.objects.get(id=data['id'])
             if(data['type'] == 'tutor'):
@@ -969,7 +969,7 @@ class TokenInfo(APIView):
 class LoginAs(APIView):
     def post(self, request, format=None):
         try:
-            data = jwt.decode(request.data['session_token'], secret_key, algorithm='HS256')
+            data = jwt.decode(request.data['session_token'], os.environ['SECRET_KEY'], algorithm='HS256')
             user = request.data['user']
             if(data['type'] == 'admin'):
                 if(user['type'] == 'parent'):
@@ -981,7 +981,7 @@ class LoginAs(APIView):
                             'sub':parent.username,
                             'type':'parent'
                         }
-                        encoded_jwt = jwt.encode(payload, secret_key, algorithm='HS256')
+                        encoded_jwt = jwt.encode(payload, os.environ['SECRET_KEY'], algorithm='HS256')
                         data['exists'] = True
                         data['session_token'] = encoded_jwt
                         return Response(data)
@@ -997,7 +997,7 @@ class LoginAs(APIView):
                             'sub':tutor.username,
                             'type':'tutor'
                         }
-                        encoded_jwt = jwt.encode(payload, secret_key, algorithm='HS256')
+                        encoded_jwt = jwt.encode(payload, os.environ['SECRET_KEY'], algorithm='HS256')
                         data['exists'] = True
                         data['session_token'] = encoded_jwt
                         return Response(data)
