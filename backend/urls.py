@@ -181,7 +181,6 @@ urlpatterns = [
     path('twilio/', views.TwilioAPI.as_view()),
     path('email/', views.EmailAPI.as_view()),
     path('brankas/', views.BrankasAPI.as_view()),
-    path('agora-rtm-token/', views.AgoraRtmToken.as_view()),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('api-token-auth/', obtain_jwt_token),
     path('api-token-verify/', verify_jwt_token),

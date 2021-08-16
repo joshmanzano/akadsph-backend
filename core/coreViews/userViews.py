@@ -10,7 +10,6 @@ from core.extra_functions import getStartDateAndEndDateOfWeek, displayErrors
 from django.utils import timezone
 import datetime
 import pytz
-from core.views import zoom_create_meeting
 
 from core.serializers import (
     UserSerializer,

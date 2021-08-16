@@ -8,7 +8,6 @@ from django.utils import timezone
 import datetime
 from core.extra_functions import getStartDateAndEndDateOfWeek
 import pytz
-from core.views import zoom_create_meeting
 from core.ws import sendUpdate, sendBroadcast
 from core.send_email import SendEmail
 

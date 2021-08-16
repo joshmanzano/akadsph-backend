@@ -35,66 +35,6 @@ def database_check(request):
             'HOST': host
         })
 
-# Agora Token
-
-class AgoraRtmToken(APIView):
-    """
-    POST:
-    Description: Agora RTM Token
-    Input:
-    {
-    "user": string
-    "uid": string
-    }
-    """
-    def post(self, request, format=None):
-        user = request.data['user']
-        uid = request.data['uid']
-
-        token = TokenServer.get_token(user, uid)
-
-        return Response({
-            'token': token
-        })
-
-# Zoom Functions
-
-def zoom_create_meeting(tutee, subject, start_time, duration):
-    url = "https://api.zoom.us/v2/users/me/meetings"
-    currentTime = int(datetime.datetime.now().timestamp())
-    token_data = {
-        "aud": None,
-        "iss": "P9xBzrKFSTmhu_Ca0EfP0w",
-        "exp": currentTime + 3600,
-        "iat": currentTime
-    }
-    access_token = jwt.encode(token_data, zoom_api_secret, algorithm='HS256').decode('utf8')
-    timezone = 'Asia/Singapore'
-
-    # Examples
-    # tutee = "Joshua Manzano"
-    # subject = "Math"
-    # start_time = "2020-12-27T21:30:00"
-    # duration = "60"
-    # timezone = "Asia/Singapore"
-
-    payload = "{\n    \"topic\": \"AKADS - %s - %s\",\n    \"type\": 2,\n    \"start_time\": \"%s\",\n    \"duration\": %s,\n    \"timezone\": \"%s\",\n    \"settings\": {\n        \"waiting_room\": false,\n        \"auto_recording\": \"local\"\n    }\n}" % (tutee, subject, start_time, duration, timezone)
-    headers = {
-    'Authorization': 'Bearer '+access_token,
-    'Content-Type': 'application/json',
-    }
-
-    response = requests.request("POST", url, headers=headers, data = payload)
-    data = json.loads(response.text.encode('utf8'))
-
-    response = {
-        'zoom_id': data['id'],
-        'start_url': data['start_url'],
-        'join_url': data['join_url']
-    }
-
-    return response
-
 # NextCloud API
 
 def createFolders(parent_fname, parent_lname, parent_id, subjects):
