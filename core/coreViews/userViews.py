@@ -362,29 +362,29 @@ class AllParentDetails(APIView):
 
         for r in serializer_class.data:
             # if r['start_date_time'].split("T")[0] == date:
-            preq_info = {}
-            c_ob = Child.objects.get(id=r['child'])
-            sub_ob = Subject.objects.get(id=r['subject'])
             try:
+                preq_info = {}
+                c_ob = Child.objects.get(id=r['child'])
+                sub_ob = Subject.objects.get(id=r['subject'])
                 session = Session.objects.get(request=r['id'])
+
+                c_ob_serializer = ChildSerializer(c_ob)
+                sub_ob_serializer = SubjectSerializer(sub_ob)
+                session_serializer = SessionSerializer(session)
+
+                tutor_ob = Tutor.objects.get(id=session_serializer.data['tutor'])
+                tutor_serializer = TutorSerializer(tutor_ob)
+
+                preq_info['child'] = c_ob_serializer.data
+                preq_info['request'] = r
+                preq_info['subject'] = sub_ob_serializer.data
+                preq_info['session'] = session_serializer.data
+                preq_info['tutor'] = tutor_serializer.data
+
+                AcceptedRequestsSet.append(preq_info)
             except Exception as e:
                 print(e)
                 pass
-
-            c_ob_serializer = ChildSerializer(c_ob)
-            sub_ob_serializer = SubjectSerializer(sub_ob)
-            session_serializer = SessionSerializer(session)
-
-            tutor_ob = Tutor.objects.get(id=session_serializer.data['tutor'])
-            tutor_serializer = TutorSerializer(tutor_ob)
-
-            preq_info['child'] = c_ob_serializer.data
-            preq_info['request'] = r
-            preq_info['subject'] = sub_ob_serializer.data
-            preq_info['session'] = session_serializer.data
-            preq_info['tutor'] = tutor_serializer.data
-
-            AcceptedRequestsSet.append(preq_info)
 
             # session = Session.objects.get(request=r['id'])
             # r['zoom_link'] = session.zoom_link
