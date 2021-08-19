@@ -365,7 +365,11 @@ class AllParentDetails(APIView):
             preq_info = {}
             c_ob = Child.objects.get(id=r['child'])
             sub_ob = Subject.objects.get(id=r['subject'])
-            session = Session.objects.get(request=r['id'])
+            try:
+                session = Session.objects.get(request=r['id'])
+            except Exception as e:
+                print(e)
+                pass
 
             c_ob_serializer = ChildSerializer(c_ob)
             sub_ob_serializer = SubjectSerializer(sub_ob)
