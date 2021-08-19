@@ -94,7 +94,7 @@ class Requests(models.Model):
 	child = models.ForeignKey(Child, on_delete=models.CASCADE)
 	fav_tutor = models.ForeignKey(Tutor, blank=True, null=True, on_delete=models.CASCADE, related_name='favourite')
 	subject = models.ForeignKey(Subject, on_delete=models.CASCADE)
-	declined_tutors = models.ManyToManyField(Tutor, related_name='declined_tutors')
+	declined_tutors = models.ManyToManyField(Tutor, blank=True, related_name='declined_tutors')
 	declined_reason = models.CharField(max_length=1000, blank=True, null=True)
 	time = models.IntegerField(default = 0)
 	extra_files = models.CharField(max_length=200, blank=True, null=True)
