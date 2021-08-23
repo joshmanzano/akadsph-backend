@@ -832,13 +832,16 @@ class RegisterParent(APIView):
                 pass
 
         #create conversation with admin and send a default message
-        conversation = AdminParentConversation(parent=parent)
-        conversation.save()
+        try:
+            conversation = AdminParentConversation(parent=parent)
+            conversation.save()
 
-        message = AdminParentMessage(ap_conversation=conversation,
-            sender='admin',
-            text='Hello, ' + parent.first_name + '! If you have any inquiries or concerns, please feel free to message me!')
-        message.save()
+            message = AdminParentMessage(ap_conversation=conversation,
+                sender='admin',
+                text='Hello, ' + parent.first_name + '! If you have any inquiries or concerns, please feel free to message me!')
+            message.save()
+        except Exception as e:
+            print(e)
 
         encoded_jwt = jwt.encode(payload, os.environ['SECRET_KEY'], algorithm='HS256')
         return Response(encoded_jwt)
