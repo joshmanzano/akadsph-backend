@@ -485,7 +485,7 @@ class AllParentDetails(APIView):
         conversation_dict['inactive'] = []
 
         convo_ob = {}
-        ap_con = AdminParentConversation.objects.get_or_create(parent=parent_id)
+        ap_con = AdminParentConversation.objects.get_or_create(parent=Parent.get(id=parent_id))
         apcon_ser = AdminParentConversationSerializer(ap_con)
         convo_ob['conversation'] = apcon_ser.data
         message =  AdminParentMessage.objects.filter(ap_conversation=ap_con.id).order_by('-time_sent').first()
