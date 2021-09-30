@@ -99,9 +99,12 @@ class CleanUsers(APIView):
             emails.append(email)
             if not re.fullmatch('[^@]+@[^@]+\.[^@]+', email):
                 invalid_emails.append([p.id, p.username, email])
+            if not re.fullmatch('[^@]+@[^@]+\.[^@]+', p.username):
+                invalid_emails.append([p.id, p.username, email])
 
         resp = {}
         resp['invalid_emails'] = invalid_emails
+        resp['emails'] = emails 
 
         return Response(resp)
 
