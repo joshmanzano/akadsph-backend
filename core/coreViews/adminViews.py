@@ -79,6 +79,8 @@ from core.models import (
     CreditTracker
     )
 
+from collections import Counter
+
 class CleanUsers(APIView):
     """
     GET:
@@ -104,7 +106,7 @@ class CleanUsers(APIView):
 
         resp = {}
         unique_emails = set(emails)
-        duplicates = emails - list(unique_emails)
+        duplicates = [k for k,v in Counter(emails).items() if v > 1]
 
         resp['invalid_emails'] = invalid_emails
         resp['emails'] = unique_emails 
