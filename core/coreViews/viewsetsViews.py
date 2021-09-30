@@ -39,10 +39,12 @@ from core.serializers import (
     AdminParentMessageSerializer,
     AdminParentConversationSerializer,
     TutorStrikeSerializer,
-    CreditTrackerSerializer
+    CreditTrackerSerializer,
+    LinkTrackerSerializer
     )
 
 from core.models import (
+    LinkTracker,
     Parent,
     Tutor,
     Child,
@@ -892,3 +894,15 @@ class CreditTrackerViewset(viewsets.ModelViewSet):
     serializer_class = CreditTrackerSerializer
     permission_classes = [permissions.IsAuthenticated]
     http_method_names = ['get', 'put', 'patch', 'post', 'head']
+
+class LinkTrackerViewset(viewsets.ModelViewSet):
+    """
+    GET POST
+    """
+
+    queryset = LinkTracker.objects.all()
+    serializer_class = LinkTrackerSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    http_method_names = ['get', 'put', 'patch', 'post', 'head']
+
+

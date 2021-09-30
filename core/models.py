@@ -40,6 +40,7 @@ class Parent(models.Model):
 	referrer_method = models.CharField(max_length=20, default = '', blank=True, null=True)
 	other_referrer = models.CharField(max_length=20, default = '', blank=True, null=True)
 	survey = JSONField(blank=True, null=True)
+	created_at = models.DateTimeField(default = django.utils.timezone.now)
 	# converted = models.BooleanField(default=False)
 	#payment methods #fix when payment methods are figured out
 
@@ -79,6 +80,7 @@ class Tutor(models.Model):
 	birthday = models.DateTimeField(default=django.utils.timezone.now, blank=True, null=True)
 	first_time_user = models.BooleanField(default=True)
 	fake_user = models.BooleanField(default=False)
+	created_at = models.DateTimeField(default = django.utils.timezone.now)
 
 class TutorSetting(models.Model):
 	tutor = models.ForeignKey(Tutor, on_delete=models.CASCADE)
@@ -112,6 +114,7 @@ class Session(models.Model):
 	start_date_time = models.DateTimeField(default = django.utils.timezone.now)
 	end_date_time = models.DateTimeField(default = django.utils.timezone.now)
 	tutor = models.ForeignKey(Tutor, blank=True, null=True, on_delete=models.CASCADE)
+	time_created = models.DateTimeField(default = django.utils.timezone.now)
 
 class Conversation(models.Model):
 	session = models.ForeignKey(Session, on_delete=models.CASCADE)
@@ -282,3 +285,7 @@ class CreditTracker(models.Model):
 	time = models.DateTimeField(default = django.utils.timezone.now)
 	add_credit = models.IntegerField()
 	subtract_credit = models.IntegerField()
+
+class LinkTracker(models.Model):
+	parameters = JSONField(blank=True, null=True)
+	created_at = models.DateTimeField(default = django.utils.timezone.now)

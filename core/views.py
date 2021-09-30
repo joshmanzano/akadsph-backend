@@ -10,7 +10,7 @@ import jwt
 from rest_framework.response import Response
 import smtplib
 from rest_framework.generics import ListAPIView, ListCreateAPIView, DestroyAPIView, UpdateAPIView
-from core.models import GeneralPromo, UniquePromo, BrankasTransaction, SourcePayMongoTransaction, AdminTutorMessage, AdminTutorConversation, AdminParentMessage, AdminParentConversation, AccountLogger, Admin, ShopItem, TutorSubject, Parent, Tutor, Child, Requests, Feedback, Session, Conversation, Message, FavouriteTutor, PayMongoTransaction, AvailableDays, Subject, AdminSetting, ParentSetting, TutorSetting
+from core.models import LinkTracker, GeneralPromo, UniquePromo, BrankasTransaction, SourcePayMongoTransaction, AdminTutorMessage, AdminTutorConversation, AdminParentMessage, AdminParentConversation, AccountLogger, Admin, ShopItem, TutorSubject, Parent, Tutor, Child, Requests, Feedback, Session, Conversation, Message, FavouriteTutor, PayMongoTransaction, AvailableDays, Subject, AdminSetting, ParentSetting, TutorSetting
 from django.utils import timezone
 from django.core.exceptions import ObjectDoesNotExist
 import datetime
@@ -1158,6 +1158,14 @@ class SourcePayMongoAPI(APIView):
             'src_id': src_id,
             'checkout_url': checkout_url
         })
+
+class AddLinkTracker(APIView):
+    def post(self, request, format=None):
+        parameters = request.data['parameters']
+        tracker = LinkTracker(parameters=parameters) 
+        tracker.save()
+
+        return Response(True)
 
 class VerifySourcePayMongoAPI(APIView):
     def post(self, request, format=None):

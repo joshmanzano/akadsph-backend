@@ -33,7 +33,8 @@ from core.models import (
     AdminTutorConversation,
     AdminParentMessage,
     AdminParentConversation,
-    CreditTracker
+    CreditTracker,
+    LinkTracker
     )
 
 
@@ -51,12 +52,12 @@ class GroupSerializer(serializers.HyperlinkedModelSerializer):
 class ParentSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = Parent
-		fields = ['id', 'username', 'first_name', 'last_name', 'email', 'credits', 'status', 'phone', 'picture','files', 'first_time_user', 'referrer_code', 'referrer_method', 'survey', 'other_referrer', 'fake_user']
+		fields = ['id', 'username', 'first_name', 'last_name', 'email', 'credits', 'status', 'phone', 'picture','files', 'first_time_user', 'referrer_code', 'referrer_method', 'survey', 'other_referrer', 'fake_user', 'created_at']
 
 class TutorSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = Tutor
-		fields = ['id', 'username','first_name', 'last_name', 'email', 'school', 'course', 'achievements', 'rating', 'status', 'phone', 'picture', 'files', 'bank_name', 'bank_account_name', 'bank_account_type', 'bank_account_number', 'first_time_user', 'birthday', 'fake_user']
+		fields = ['id', 'username','first_name', 'last_name', 'email', 'school', 'course', 'achievements', 'rating', 'status', 'phone', 'picture', 'files', 'bank_name', 'bank_account_name', 'bank_account_type', 'bank_account_number', 'first_time_user', 'birthday', 'fake_user', 'created_at']
 
 class ChildSerializer(serializers.ModelSerializer):
 	class Meta:
@@ -212,3 +213,9 @@ class CreditTrackerSerializer(serializers.ModelSerializer):
     class Meta:
         model = CreditTracker
         fields = ['id', 'parent', 'time', 'add_credit', 'subtract_credit']
+
+class LinkTrackerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LinkTracker 
+        fields = ['parameters', 'created_at']
+

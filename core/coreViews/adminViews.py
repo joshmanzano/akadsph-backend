@@ -11,6 +11,7 @@ import datetime
 import pytz
 from multiprocessing import Process
 from core.send_email import SendEmail
+import re
 
 from core.serializers import (
     UserSerializer,
@@ -77,6 +78,32 @@ from core.models import (
     AdminParentConversation,
     CreditTracker
     )
+
+class CleanUsers(APIView):
+    """
+    GET:
+    Description:
+    Input:
+    {
+    }
+    Output:
+    {
+    }
+    """
+    def get(self, request, format=None):
+        parents = Parent.objects.all()
+        emails = []
+        invalid_emails = []
+        for p in parents:
+            email = p.email
+            emails.append(email)
+            if not re.fullmatch('[^@]+@[^@]+\.[^@]+', email):
+                invalid_emails.append([p.id, p.username, email])
+
+        resp = {}
+        resp['invalid_emails'] = invalid_emails
+
+        return Response(resp)
 
 class TutorApplicationToTutorObject(APIView):
     """

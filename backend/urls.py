@@ -51,6 +51,7 @@ router.register(r'admin-tutor-conversation', viewsetsViews.AdminTutorConversatio
 router.register(r'admin-tutor-message', viewsetsViews.AdminTutorMessageViewset)
 router.register(r'tutor-strikes', viewsetsViews.TutorStrikeViewset)
 router.register(r'credit-tracker', viewsetsViews.CreditTrackerViewset)
+router.register(r'link-tracker', viewsetsViews.LinkTrackerViewset)
 
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.
@@ -140,6 +141,7 @@ urlpatterns = [
     path('archive-shop-item/', adminViews.ArchiveShopItem.as_view()),
     path('add-credit/', trackerViews.AddCreditToParent.as_view()),
     path('subtract-credit/', trackerViews.SubtractCreditToParent.as_view()),
+    path('clean-users/', adminViews.CleanUsers.as_view()),
 
     # TO DEPRECIATE
     path('add-credits/', views.AddCredits.as_view()),
@@ -164,6 +166,7 @@ urlpatterns = [
     path('purge-users/', views.PurgeUserView.as_view()),
 
     # EXTERNAL/Authentication endpoints
+    path('add-link-tracker/', views.AddLinkTracker.as_view()),
     path('login-parent/', views.LoginParent.as_view()),
     path('register-parent/', views.RegisterParent.as_view()),
     path('register-admin/', views.RegisterAdmin.as_view()),
