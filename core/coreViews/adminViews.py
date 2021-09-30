@@ -95,10 +95,12 @@ class CleanUsers(APIView):
     def get(self, request, format=None):
         parents = Parent.objects.all()
         emails = []
+        usernames = []
         invalid_emails = []
         for p in parents:
             email = p.email
             emails.append(email)
+            usernames.append(p.username)
             if not re.fullmatch('[^@]+@[^@]+\.[^@]+', email):
                 invalid_emails.append([p.id, p.username, email])
             if not re.fullmatch('[^@]+@[^@]+\.[^@]+', p.username):
@@ -106,11 +108,13 @@ class CleanUsers(APIView):
 
         resp = {}
         unique_emails = set(emails)
-        duplicates = [k for k,v in Counter(emails).items() if v > 1]
+        duplicates_emails = [[k,v] for k,v in Counter(emails).items() if v > 1]
+        duplicates_usernames = [[k,v] for k,v in Counter(usernames).items() if v > 1]
 
         resp['invalid_emails'] = invalid_emails
         resp['emails'] = unique_emails 
-        resp['duplicates'] = duplicates 
+        resp['duplicate_emails'] = duplicates_emails 
+        resp['duplicate_usernames'] = duplicates_usernames
 
         return Response(resp)
 
