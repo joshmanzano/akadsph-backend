@@ -103,8 +103,12 @@ class CleanUsers(APIView):
                 invalid_emails.append([p.id, p.username, email])
 
         resp = {}
+        unique_emails = set(emails)
+        duplicates = emails - unique_emails
+
         resp['invalid_emails'] = invalid_emails
-        resp['emails'] = emails 
+        resp['emails'] = unique_emails 
+        resp['duplicates'] = duplicates 
 
         return Response(resp)
 
