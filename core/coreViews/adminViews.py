@@ -108,8 +108,8 @@ class CleanUsers(APIView):
 
         resp = {}
         unique_emails = set(emails)
-        duplicates_emails = [[k,v] for k,v in Counter(emails).items() if v > 1]
-        duplicates_usernames = [[k,v] for k,v in Counter(usernames).items() if v > 1]
+        duplicates_emails = [k for k,v in Counter(emails).items() if v > 1]
+        duplicates_usernames = [k for k,v in Counter(usernames).items() if v > 1]
 
         duplicate_ids = []
 
