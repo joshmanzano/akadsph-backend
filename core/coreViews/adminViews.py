@@ -116,7 +116,7 @@ class CleanUsers(APIView):
         for p in parents:
             email = p.email
             if email in duplicates_emails:
-                duplicate_ids.append(p.id, p.username, email)
+                duplicate_ids.append([p.id, p.username, email])
 
 
         resp['invalid_emails'] = invalid_emails
