@@ -104,7 +104,7 @@ class CleanUsers(APIView):
 
         resp = {}
         unique_emails = set(emails)
-        duplicates = emails - unique_emails
+        duplicates = emails - list(unique_emails)
 
         resp['invalid_emails'] = invalid_emails
         resp['emails'] = unique_emails 
